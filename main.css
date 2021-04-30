@@ -1,0 +1,60 @@
+/* body {
+    background-color: rgb(29, 75, 104);
+} */
+
+h1 {
+    width: 850px;
+    margin: auto;
+    padding: auto;
+    font-family: 'Nunito', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: rgb(57, 57, 57);
+    text-align: center;
+}
+
+h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: rem;
+    font-weight: 600;
+    color: rgb(121, 38, 38);
+    text-align: center;
+}
+
+p {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    color:rgb(89, 89, 89);
+    text-align:center;
+}
+
+b {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    color: rgb(121, 38, 38);
+}
+
+.credit {
+    font-size: 12px;
+    color:rgb(18, 18, 18);
+}
+
+.boundBox {
+    width: 800px;
+    background-color:white;
+    opacity: 93%;
+    border: 3px solid rgb(28, 28, 28);
+    padding: auto;
+    margin: auto;  
+}
+
+.node:hover{
+    stroke-width: 5px !important;
+    opacity: 1 !important;
+  }
+
+  
+  
+
+

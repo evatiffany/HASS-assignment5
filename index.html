@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Assignment 5</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <!-- google fonts -->
+        <link rel="preconnect" href="https://fonts.gstatic.com"> 
+        <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&family=Rokkitt:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <!-- d3.js -->
+        <script src="https://d3js.org/d3.v4.js"></script>
+        <!-- colour palette -->
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+        <!-- My files -->
+        <link href="main.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1>🇸🇬 Singapore Budget FY2021 💰</h1>
+        <h3>Total Government Expenditure by Ministry and Sector</h3>
+        <p><i>Circle colours are based on the 4 different sectors</i> 
+            <br>
+            Hover over to see the amount spent by a ministry for that specific sector
+            <br>
+            To compare between the different sectors, you may drag the circles 😃
+        </p>
+        <p class="credit">Data retrieved from: <a href="https://data.gov.sg/dataset/government-fiscal-position-annual?view_id=9f927102-438c-4f30-b273-63c1d774d4f0&resource_id=7b4af397-3e8f-40de-9208-90d168afc810">Data.gov.sg</a></p>
+        
+        <!-- graph div -->
+        <div class = "boundBox">
+            <center>
+            <div id="myGraph"></div>
+            </center>
+        </div>
+
+        <script>
+            // set the dimensions and margins of the graph
+            var width = 600
+            var height = 460
+
+            // append the svg object to the body of the page
+            var svg = d3.select("#myGraph")
+            .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+
+            // Read data
+            d3.csv("budget_2021.csv", function(data) {
+
+                // Colour palette for sectors
+                var color = d3.scaleOrdinal()
+                    .domain(['Social Development', 'Security and External Relations', 'Economic Development', 'Government Administration'])
+                    .range(d3.schemeSet3);
+
+                // Size scale for ministries
+                var size = d3.scaleLinear()
+                    .domain([0, 17355]) //17355 is the max amount 
+                    .range([10,70])  //size of circles
+
+                // create a tooltip
+                var Tooltip = d3.select("#myGraph")
+                    .append("div")
+                    .style("opacity", 0)
+                    .attr("class", "tooltip")
+                    .style("font-family", "Nunito")
+                    .style("background-color", "white")
+                    .style("border", "solid")
+                    .style("border-width", "2px")
+                    .style("border-radius", "5px")
+                    .style("padding", "5px")
+
+                // Three function that change the tooltip when user hover / move / leave a cell
+                var mouseover = function(d) {
+                    Tooltip
+                    .style("opacity", 1)
+                }
+                var mousemove = function(d) {
+                    Tooltip
+                        .html("<b>" + d.ministry + "</b> in <b>" + d.sector + " </b> <br>" + "$" + d.amount + " millions (in SGD)")
+                        .style("left", (d3.mouse(this)[0]+20) + "px")
+                        .style("top", (d3.mouse(this)[1]) + "px")
+                }
+                var mouseleave = function(d) {
+                    Tooltip
+                    .style("opacity", 0)
+                }
+
+                // Initialize the circle: all located at the center of the svg area
+                var node = svg.append("g")
+                    .selectAll("circle")
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("class", "node")
+                    .attr("r", function(d){ return size(d.amount)})
+                    .attr("cx", width / 2)
+                    .attr("cy", height / 2)
+                    .style("fill", function(d){ return color(d.sector)})
+                    .style("fill-opacity", 0.8)
+                    .attr("stroke", "black")
+                    .style("stroke-width", 1)
+                    .on("mouseover", mouseover) // What to do when hovered
+                    .on("mousemove", mousemove)
+                    .on("mouseleave", mouseleave)
+                    .call(d3.drag() // call specific function when circle is dragged
+                        .on("start", dragstarted)
+                        .on("drag", dragged)
+                        .on("end", dragended));
+
+                // Features of the forces applied to the nodes:
+                var simulation = d3.forceSimulation()
+                    .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
+                    .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted one each other of value is > 0
+                    .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.amount)+3) }).iterations(1)) // Force that avoids circle overlapping
+
+                // Apply these forces to the nodes and update their positions.
+                // Once the force algorithm is happy with positions ('alpha' value is low enough), simulations will stop.
+                simulation
+                    .nodes(data)
+                    .on("tick", function(d){
+                        node
+                            .attr("cx", function(d){ return d.x; })
+                            .attr("cy", function(d){ return d.y; })
+                    });
+
+                // What happens when a circle is dragged?
+                function dragstarted(d) {
+                    if (!d3.event.active) simulation.alphaTarget(.03).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+                function dragged(d) {
+                    d.fx = d3.event.x;
+                    d.fy = d3.event.y;
+                }
+                function dragended(d) {
+                    if (!d3.event.active) simulation.alphaTarget(.03);
+                    d.fx = null;
+                    d.fy = null;
+                }
+
+            })
+
+
+        </script>
+
+    </body>
+</html>
